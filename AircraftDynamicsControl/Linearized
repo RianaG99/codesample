@@ -1,4 +1,4 @@
-function [time, x_dot] = Linear(SteadyHoverState,m,I_x,I_y,I_z,g)
+function [time, x_dot] = LinearClosedLoop(SteadyHoverState,m,I_x,I_y,I_z,g,k,k1_Lat,k2_Lat,k1_Long,k2_Long)
     
 A = [ 0 0 0 0 0 0 1 0 0 0 0 0; ...
          0 0 0 0 0 0 0 1 0 0 0 0  ;...
@@ -9,9 +9,9 @@ A = [ 0 0 0 0 0 0 1 0 0 0 0 0; ...
           0 0 0 0 -g 0 0 0 0 0 0 0 ; ...
           0 0 0 g 0 0 0 0 0 0 0 0 ; ...
           0 0 0 0 0 0 0 0 0 0 0 0 ; ...
-          0 0 0 0 0 0 0 0 0 0 0 0 ; ...
-          0 0 0 0 0 0 0 0 0 0 0 0 ; ...
-          0 0 0 0 0 0 0 0 0 0 0 0 ] ;
+          0 0 0 -k2_Lat/I_x 0 0 0 0 0 -k1_Lat/I_x 0 0 ; ...
+          0 0 0 0 -k2_Long/I_y 0 0 0 0 0 -k1_Long/I_y 0 ; ...
+          0 0 0 0 0 0 0 0 0 0 0 -k/I_z ] ;
           
 B = zeros(12,1); 
 B(9,1) = 1/m; 
@@ -19,16 +19,11 @@ B(10,1) = 1/ I_x;
 B(11,1) = 1/I_y;
 B(12,1) = 1/I_z; 
 
-C = eye(12); %identity matrix
+C = eye(12); 
 D = zeros(12,1);
 sys = ss(A,B,C,D);
 tfinal = 2;
 x_dot = initial(sys,SteadyHoverState, tfinal );
-% x_dot_4b = initial(sys,SteadyHoverStateb, tfinal );
-% x_dot_4c = initial(sys,SteadyHoverStatec, tfinal );
-% x_dot_4d = initial(sys,SteadyHoverStated, tfinal );
-% x_dot_4e = initial(sys,SteadyHoverStatee, tfinal );
-% x_dot_4f = initial(sys,SteadyHoverStatef, tfinal );
 
 timea = linspace(0,2,length(x_dot));
 time = timea';
