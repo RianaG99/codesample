@@ -1,0 +1,16 @@
+function [motor_forces] = ComputeMotorForces(Zc,Lc, Mc,Nc, R, k_m) % (problem 2)
+
+%Inputs: [Zc,Lc, Mc,Nc] - control forces
+%R - Radian DIstance from CG to propellar,k_m - control moment coefficient
+ 
+%Outputs: motor_forces - [f1 f2 f3 f4] forces on each of the four rotors
+
+%Methodology: Follow the equation for solving for motor forces using
+%control forces 
+
+    motor_forces = [ -1           -1          -1         -1 ; ...
+                    -R/sqrt(2) -R/sqrt(2)  R/sqrt(2)  R/sqrt(2) ; ...
+                    R/sqrt(2)  -R/sqrt(2) -R/sqrt(2)  R/sqrt(2) ; ...
+                    k_m           -k_m         k_m       -k_m]' ...
+                    * [Zc ; Lc; Mc; Nc] ; 
+end 
