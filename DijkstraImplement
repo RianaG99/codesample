@@ -1,0 +1,171 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct  5 14:10:35 2022
+
+@author: riana
+"""
+#ask about picking paths with same, won't it affect the number of iterations?
+#just remove the heuristic, path becomes greedy and longer now
+
+import numpy as np
+#heuristics for the associated node
+
+def AsuperStar(nbest,f_plus):
+    
+    O_cost = np.array([])
+    O = np.array([])
+    f_path = np.array([])
+    
+
+    
+    for i in range(len(nodes[nbest]['neighbors'])):
+        f = nodes[nbest]['neighbors'][i][1] + f_plus #cost of path
+        name = nodes[nbest]['neighbors'][i][0]
+        h = nodes[name]['h']
+        
+        cost = f 
+        
+        f_path = np.append(f_path,f)
+        O = np.append(O,name)
+        O_cost = np.append(O_cost,cost)
+        
+    return O_cost, O,f_path
+
+def backtrack(C,Final_cost,start,end):
+    
+    path = np.array([end])
+    pathoptions = np.array([])
+    pathoptions_c = np.array([])
+    name_final = end #current final name its at
+    
+    i = 1
+    cost = 0
+    
+    while name_final != start:
+        
+
+        size = len(path)
+               
+        if len(nodes[C[-i]]['neighbors']) > 1:
+            for j in range(len(nodes[C[-i]]['neighbors'])):
+                if nodes[C[-i]]['neighbors'][j][0] == path[-1]: #and nodes[C[i]]['neighbors'][j][0] in C:
+                    path = np.append(path,C[-i]) #append the neighbor of the end
+                                   #pop all unti       
+                    pathoptions_c = np.append(pathoptions_c,nodes[C[-i]]['neighbors'][j][1]) #keep the cost of said path
+                    cost = np.sum(pathoptions_c)
+                    i = 1
+                    break
+                 
+        elif len(nodes[C[-i]]['neighbors']) == 1:      
+            if nodes[C[-i]]['neighbors'][0][0] == path[-1]: #and nodes[C[i]]['neighbors'][0][0] in C:
+                path = np.append(path,C[-i]) #append the neighbor of the end
+                        #pop all unti       
+                pathoptions_c = np.append(pathoptions_c,nodes[C[-i]]['neighbors'][0][1]) #keep the cost of said path
+                cost = np.sum(pathoptions_c)
+                i = 1
+                
+        if len(path) == size:
+            i +=1
+
+                
+        if cost > Final_cost:
+            l = np.where(C == path[1])[0]
+            path = np.array([end])
+            pathoptions_c = np.array([])
+            C = np.delete(C,l)
+            i = 1
+            cost = 0
+                
+                    
+            
+                
+        if path[-1] == start and cost == Final_Cost:
+            name_final = start
+            
+    path = np.flip(path)        
+    return path
+
+
+nodes = {'v0': {'neighbors':[('v1',3),('v2',1),('v3',3),('v4',1),('v5',3)], 'h':0},
+         'v1': {'neighbors':[('v6',1),('v7',3)],'h':3},
+         'v2': {'neighbors':[('v1',0),('v7',3),('v8',2),('v9',1)], 'h':3},
+         'v3': {'neighbors':[('v9',3)], 'h':3},
+         'v4': {'neighbors':[('v9',1),('v10',2),('v11',3),('v5',2)], 'h':3},
+         'v5': {'neighbors':[('v11',1),('v12',1)], 'h':3},
+         'v6': {'neighbors':[('v7',1)], 'h':2},
+         'v7': {'neighbors':[('v13',1)], 'h':1},
+         'v8': {'neighbors':[('v13',3)], 'h':1},
+         'v9': {'neighbors':[('v13',3)], 'h':1},
+         'v10': {'neighbors':[('v13',3)], 'h':1},
+         'v11': {'neighbors':[('v13',1)], 'h':1},
+         'v12': {'neighbors':[('v11',3)], 'h':2},
+         'v13': {'neighbors':[], 'h':0}}
+
+start_node = 'v0'
+end_node = 'v13'
+
+#create an initialized open list, ths is the priority que
+O = np.array([])
+O = np.append(O,start_node) #add the heuristic?
+
+O_cost = np.array([])
+#create an initialized closed list - nothing
+C = np.array([])
+C = np.append(C,start_node)
+
+#while O.size != 0:
+    
+node = 'v0' #just to start
+f_plus = 0 #the value from start node to new node
+iteration = 0
+
+f_path = np.array([])
+
+
+#this works to find the path cost
+while node != 'v13':
+    
+    
+    O_costp,Op,f_oof = AsuperStar(node,f_plus)  
+    
+    O_cost = np.append(O_cost,O_costp)
+    O = np.append(O,Op)
+    f_path = np.append(f_path,f_oof)
+    
+    if 'v0' in O:
+        O = np.delete(O,0)
+    
+    low = np.min(O_cost)
+    ind = np.where(O_cost == low )[0][0]
+    
+   # if ind.size > 1:
+    #    ind = ind[0]
+        
+    node = O[ind] #the nbest value
+    
+    if f_path.size > 1:
+        f_plus = f_path[ind]
+    else:
+        f_plus = f_oof
+    
+    C = np.append(C,O[ind])
+    
+    O = np.delete(O,ind)
+    
+    if node != 'v13':
+        O_cost = np.delete(O_cost,ind)
+    else:
+        Final_Cost = O_cost[ind]
+        print("Least Cost", Final_Cost)
+
+    f_path = np.delete(f_path,ind)
+    
+    
+    
+
+        
+    iteration += 1
+    if node == 'v13':
+        print("Number of iterations", iteration)
+        path_nodes = backtrack(C,Final_Cost,start_node,end_node)
+        print("Path to End is:",path_nodes)
