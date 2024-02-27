@@ -1,0 +1,8 @@
+function rudder_perturb = YawAttitudeControl(kr,r)
+
+%Inputs: kr = chosen gain for yaw control from locus plot
+%r = yaw rate 
+
+%Outputs: dr = the rudder perturbation to input into aircraft surfaces
+
+rudder_perturb = -kr*r;
